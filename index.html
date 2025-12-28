@@ -1,90 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Simple Weather App</title>
+    <meta charset="UTF-8">
+    <title>My Tasks</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ccc; }
+        .finished { text-decoration: line-through; color: #888; }
+        button { margin-left: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
-	<h1>Weather App</h1>
-	<label for="cityInput">City name:</label>
-	<input id="cityInput" type="text" placeholder="Enter city name">
-	<button id="fetchBtn">Get Weather</button>
 
-	<div id="result" aria-live="polite" style="margin-top:1em"></div>
+    <h2>To-Do App</h2>
+    
+    <input type="text" id="userInput">
+    <button onclick="newItem()">Add Item</button>
 
-	<script>
-		async function getWeather() {
-			const city = document.getElementById('cityInput').value.trim();
-			const resultEl = document.getElementById('result');
-			if (!city) {
-				resultEl.textContent = 'Please enter a city name.';
-				return;
-			}
+    <div id="box"></div>
 
-			try {
-				const apiKey = '03e7348b1b96d647ddea925d9da24ff5'; 
-				const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+    <script>
+        let list = [];
 
-				const response = await fetch(url);
-				if (!response.ok) {
-					// Throw an error so the catch block handles wrong city or other response errors
-					throw new Error('City not found or API error');
-				}
+        function startApp() {
+            let storedData = localStorage.getItem('student_list');
+            if (storedData) {
+                list = JSON.parse(storedData);
+            }
+            showList();
+        }
 
-				const data = await response.json();
+        function showList() {
+            let htmlStr = "";
+            for (let i = 0; i < list.length; i++) {
+                let cssClass = "";
+                if (list[i].isDone) {
+                    cssClass = "finished";
+                }
 
-				const temp = data.main && data.main.temp;
-				const humidity = data.main && data.main.humidity;
-				const condition = data.weather && data.weather[0] && data.weather[0].description;
+                htmlStr += `
+                    <div class="row">
+                        <span class="${cssClass}">${list[i].name}</span>
+                        <div>
+                            <button onclick="changeStatus(${i})">✔</button>
+                            <button onclick="removeItem(${i})">X</button>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('box').innerHTML = htmlStr;
+        }
 
-				resultEl.innerHTML = `
-					<p><strong>Temperature:</strong> ${temp} °C</p>
-					<p><strong>Humidity:</strong> ${humidity} %</p>
-					<p><strong>Condition:</strong> ${condition}</p>
-				`;
-			} catch (err) {
+        function newItem() {
+            let val = document.getElementById('userInput').value;
+            if (val.length > 0) {
+                let obj = { name: val, isDone: false };
+                list.push(obj);
+                save();
+                document.getElementById('userInput').value = "";
+            }
+        }
 
-				resultEl.textContent = 'Error: ' + err.message;
-			}
-		}
+        function removeItem(id) {
+            list.splice(id, 1);
+            save();
+        }
 
-		document.getElementById('fetchBtn').addEventListener('click', getWeather);
-		document.getElementById('cityInput').addEventListener('keyup', function (e) {
-			if (e.key === 'Enter') getWeather();
-		});
-	</script>
+        function changeStatus(id) {
+            list[id].isDone = !list[id].isDone;
+            save();
+        }
+
+        function save() {
+            localStorage.setItem('student_list', JSON.stringify(list));
+            showList();
+        }
+
+        startApp();
+    </script>
 </body>
-</html> 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</html>
