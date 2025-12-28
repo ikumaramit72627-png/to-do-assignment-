@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Simple Weather App</title>
+</head>
+<body>
+	<h1>Weather App</h1>
+	<label for="cityInput">City name:</label>
+	<input id="cityInput" type="text" placeholder="Enter city name">
+	<button id="fetchBtn">Get Weather</button>
+
+	<div id="result" aria-live="polite" style="margin-top:1em"></div>
+
+	<script>
+		async function getWeather() {
+			const city = document.getElementById('cityInput').value.trim();
+			const resultEl = document.getElementById('result');
+			if (!city) {
+				resultEl.textContent = 'Please enter a city name.';
+				return;
+			}
+
+			try {
+				const apiKey = '03e7348b1b96d647ddea925d9da24ff5'; 
+				const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+
+				const response = await fetch(url);
+				if (!response.ok) {
+					// Throw an error so the catch block handles wrong city or other response errors
+					throw new Error('City not found or API error');
+				}
+
+				const data = await response.json();
+
+				const temp = data.main && data.main.temp;
+				const humidity = data.main && data.main.humidity;
+				const condition = data.weather && data.weather[0] && data.weather[0].description;
+
+				resultEl.innerHTML = `
+					<p><strong>Temperature:</strong> ${temp} °C</p>
+					<p><strong>Humidity:</strong> ${humidity} %</p>
+					<p><strong>Condition:</strong> ${condition}</p>
+				`;
+			} catch (err) {
+
+				resultEl.textContent = 'Error: ' + err.message;
+			}
+		}
+
+		document.getElementById('fetchBtn').addEventListener('click', getWeather);
+		document.getElementById('cityInput').addEventListener('keyup', function (e) {
+			if (e.key === 'Enter') getWeather();
+		});
+	</script>
+</body>
+</html> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
